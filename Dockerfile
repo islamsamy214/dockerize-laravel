@@ -105,9 +105,9 @@ COPY composer.json composer.lock ./
 # Set permissions
 RUN chmod +x /usr/local/bin/start-container.sh
 RUN usermod -u $WWWUSER app
-RUN mkdir /.composer
 
 # Run Composer install
+RUN mkdir /.composer
 RUN chmod -R ugo+rw /.composer
 RUN composer install --ignore-platform-reqs --no-interaction --no-progress --working-dir=/var/www/html
 RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
