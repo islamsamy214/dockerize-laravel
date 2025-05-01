@@ -28,7 +28,7 @@ php /var/www/html/artisan migrate --force
 # php /var/www/html/artisan scout:sync
 
 chown -R app:app /var/www/html
-chmod -R 755 /var/www/html/storage /var/www/html/public
+chmod -R 775 /var/www/html/storage /var/www/html/public
 
 if [ $# -gt 0 ]; then
     if [ "$SUPERVISOR_PHP_USER" = "root" ]; then
