@@ -114,14 +114,6 @@ RUN echo 'export APACHE_RUN_GROUP=app' >> /etc/apache2/envvars
 RUN chmod +x /usr/local/bin/start-container.sh
 RUN usermod -u $WWWUSER app
 
-# # Set permissions for Apache logs
-# RUN mkdir -p /var/log/apache2 \
-#     && chown -R app:app /var/log/apache2 \
-#     && chmod -R 755 /var/log/apache2 \
-#     && touch /var/log/apache2/error.log /var/log/apache2/access.log \
-#     && chown app:app /var/log/apache2/error.log /var/log/apache2/access.log \
-#     && chmod 644 /var/log/apache2/error.log /var/log/apache2/access.log
-
 # Ensure Apache can write to run directory
 RUN mkdir -p /var/run/apache2 \
     && chown -R app:app /var/run/apache2
