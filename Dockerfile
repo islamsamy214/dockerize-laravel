@@ -13,7 +13,7 @@ WORKDIR /var/www/html
 # Environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
-ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan serve --host=0.0.0.0 --port=80"
+ENV SUPERVISOR_APACHE_COMMAND="/usr/sbin/apache2ctl -D FOREGROUND"
 ENV SUPERVISOR_PHP_USER="app"
 ENV PGSSLCERT=/tmp/postgresql.crt
 
@@ -30,10 +30,12 @@ RUN apt-get update && apt-get upgrade -y \
     && mkdir -p /etc/apt/keyrings \
     && apt-get install -y gnupg gosu curl ca-certificates zip unzip git supervisor sqlite3 libcap2-bin libpng-dev python3 dnsutils librsvg2-bin fswatch ffmpeg nano vim librdkafka-dev libuv1-dev
 
-# Install PHP and extensions
+# Add PHP repository
 RUN curl -sS 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14aa40ec0831756756d7f66c4f4ea0aae5267a6c' | gpg --dearmor | tee /etc/apt/keyrings/ppa_ondrej_php.gpg > /dev/null \
-    && echo "deb [signed-by=/etc/apt/keyrings/ppa_ondrej_php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu noble main" > /etc/apt/sources.list.d/ppa_ondrej_php.list \
-    && apt-get update \
+    && echo "deb [signed-by=/etc/apt/keyrings/ppa_ondrej_php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu noble main" > /etc/apt/sources.list.d/ppa_ondrej_php.list
+
+# Install PHP and extensions
+RUN apt-get update \
     && apt-get install -y php8.2 php8.2-cli php8.2-dev php-pear \
     php8.2-pgsql php8.2-sqlite3 php8.2-gd \
     php8.2-curl php8.2-mongodb \
@@ -78,18 +80,20 @@ RUN apt-get -y autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Set PHP configuration
-RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.2
-RUN sysctl vm.overcommit_memory=1
-
 # Install Apache
 RUN apt-get update && apt-get install -y apache2 libapache2-mod-php8.2 && rm -rf /var/lib/apt/lists/*
 
-# Enable necessary Apache modules
-RUN a2enmod rewrite
-
 # Add Apache configuration for Laravel
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Bind port 80 to non-root user
+RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.2
+RUN sysctl vm.overcommit_memory=1
+RUN update-alternatives --set php /usr/bin/php8.2
+RUN setcap 'cap_net_bind_service=+ep' /usr/sbin/apache2
+
+# Enable necessary Apache modules
+RUN a2enmod rewrite
 
 # Create app user
 RUN userdel -r ubuntu
@@ -102,15 +106,31 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY php.ini /etc/php/8.2/cli/conf.d/99-app.ini
 COPY composer.json composer.lock ./
 
+# Configure Apache to run as app user
+RUN echo 'export APACHE_RUN_USER=app' >> /etc/apache2/envvars
+RUN echo 'export APACHE_RUN_GROUP=app' >> /etc/apache2/envvars
+
 # Set permissions
 RUN chmod +x /usr/local/bin/start-container.sh
 RUN usermod -u $WWWUSER app
 
+# # Set permissions for Apache logs
+# RUN mkdir -p /var/log/apache2 \
+#     && chown -R app:app /var/log/apache2 \
+#     && chmod -R 755 /var/log/apache2 \
+#     && touch /var/log/apache2/error.log /var/log/apache2/access.log \
+#     && chown app:app /var/log/apache2/error.log /var/log/apache2/access.log \
+#     && chmod 644 /var/log/apache2/error.log /var/log/apache2/access.log
+
+# Ensure Apache can write to run directory
+RUN mkdir -p /var/run/apache2 \
+    && chown -R app:app /var/run/apache2
+
 # Run Composer install
-RUN mkdir /.composer
-RUN chmod -R ugo+rw /.composer
-RUN composer install --ignore-platform-reqs --no-interaction --no-progress --working-dir=/var/www/html
-RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
+RUN mkdir /.composer \
+    && chmod -R ugo+rw /.composer \
+    && composer install --ignore-platform-reqs --no-interaction --no-progress --working-dir=/var/www/html \
+    && composer dump-autoload --optimize --no-dev --classmap-authoritative --working-dir=/var/www/html
 
 # Expose port 80 for Apache
 EXPOSE 80
