@@ -28,7 +28,17 @@ php /var/www/html/artisan migrate --force
 # php /var/www/html/artisan scout:sync
 
 chown -R app:app /var/www/html
-chmod -R 775 /var/www/html/storage /var/www/html/public
+chmod -R 775 /var/www/html/storage /var/www/html/public /var/www/html/bootstrap/cache
+mkdir -p /var/www/html/storage/logs
+
+# Ensure Apache logs are writable
+mkdir -p /var/log/apache2
+mkdir -p /var/run/apache2
+touch /var/log/apache2/error.log /var/log/apache2/access.log
+chown -R app:app /var/log/apache2
+chown -R app:app /var/run/apache2
+chmod -R 755 /var/log/apache2
+chmod 644 /var/log/apache2/error.log /var/log/apache2/access.log
 
 if [ $# -gt 0 ]; then
     if [ "$SUPERVISOR_PHP_USER" = "root" ]; then
