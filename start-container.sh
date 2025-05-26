@@ -9,13 +9,6 @@ if [ ! -z "$WWWUSER" ]; then
     usermod -u $WWWUSER app
 fi
 
-if [ ! -d /.composer ]; then
-    mkdir /.composer
-fi
-
-chmod -R ugo+rw /.composer
-
-composer install --ignore-platform-reqs --no-interaction --no-progress --working-dir=/var/www/html
 php /var/www/html/artisan key:generate
 php /var/www/html/artisan cache:clear
 php /var/www/html/artisan config:clear
