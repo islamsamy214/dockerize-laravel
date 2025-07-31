@@ -21,14 +21,14 @@ The `artisan serve` command is not designed for production environments and is b
 ```dockerfile
 # ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan serve --host=0.0.0.0 --port=80"
 ```
-2. Enable Octane with Swoole
+2. Enable Octane with frankenphp
 
-For better performance, use Octane with Swoole. Uncomment and configure the Octane-related command in your Dockerfile:
+For better performance, use Octane with frankenphp. Uncomment and configure the Octane-related command in your Dockerfile:
 
-Use Octane with Swoole for improved performance:
+Use Octane with frankenphp for improved performance:
 
 ```dockerfile
-ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan octane:start --server=swoole --host=0.0.0.0 --port=80"
+ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan octane:start --server=frankenphp --host=0.0.0.0 --port=80"
 ```
 
 ---
@@ -51,7 +51,7 @@ Configure Octane as the default PHP server:
 
 ```dockerfile
 # Set Octane as the default PHP command
-ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan octane:start --server=swoole --host=0.0.0.0 --port=80"
+ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan octane:start --server=frankenphp --host=0.0.0.0 --port=80"
 ```
 
 3. Deploy the Setup
@@ -62,7 +62,7 @@ Build and start your Docker containers:
 docker-compose up --build
 ```
 
-By following this approach, your Laravel application will leverage the performance benefits of Octane with Swoole
+By following this approach, your Laravel application will leverage the performance benefits of Octane with frankenphp
 
 ---
 
