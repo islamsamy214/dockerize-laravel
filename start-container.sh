@@ -9,13 +9,6 @@ if [ ! -z "$WWWUSER" ]; then
     usermod -u $WWWUSER app
 fi
 
-if [ ! -d /.composer ]; then
-    mkdir /.composer
-fi
-
-chmod -R ugo+rw /.composer
-
-composer install --ignore-platform-reqs --no-interaction --no-progress --working-dir=/var/www/html
 php /var/www/html/artisan key:generate
 php /var/www/html/artisan cache:clear
 php /var/www/html/artisan config:clear
@@ -28,7 +21,8 @@ php /var/www/html/artisan migrate --force
 # php /var/www/html/artisan scout:sync
 
 chown -R app:app /var/www/html
-chmod -R 755 /var/www/html/storage /var/www/html/public
+chmod -R 775 /var/www/html/storage /var/www/html/public /var/www/html/bootstrap/cache
+mkdir -p /var/www/html/storage/logs
 
 if [ $# -gt 0 ]; then
     if [ "$SUPERVISOR_PHP_USER" = "root" ]; then
