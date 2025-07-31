@@ -3,7 +3,7 @@
 **Dockerize PHP Laravel projects with the common extensions**  
 
 ## Introduction  
-This is an edited clone of Sail but with PHP 8.3 version.  
+This is an edited clone of Sail but with PHP 8.4 version.  
 
 ## How to Use  
 1. Add the provided files to your project.  

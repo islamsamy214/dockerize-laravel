@@ -1,31 +1,40 @@
 services:
-    laravel_app:
+    app:
         build:
             context: .
             dockerfile: Dockerfile
             args:
                 WWWGROUP: 1000
-        image: 'app-8.3/app'
+        image: "app:latest"
         # deploy:
         #     resources:
         #         limits:
         #             cpus: "1"
         #             memory: 2048M
         extra_hosts:
-            - 'host.docker.internal:host-gateway'
+            - "host.docker.internal:host-gateway"
         ports:
-            - '${APP_PORT:-8000}:80'
-            # - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+            - "${APP_PORT:-80}:80"
+            # - '${VITE_PORT:-5173}:5173'
+            # - '443:443'
+            # - '443:443/udp'
+            # - '2019:2019'
+            # - "${FORWARD_REVERB_PORT:-8080}:8080"
         environment:
             WWWUSER: 1000
             LARAVEL_APP: 1
-            XDEBUG_MODE: '${APP_XDEBUG_MODE:-off}'
-            XDEBUG_CONFIG: '${APP_XDEBUG_CONFIG:-client_host=host.docker.internal}'
-            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+            XDEBUG_MODE: "${APP_XDEBUG_MODE:-off}"
+            XDEBUG_CONFIG: "${APP_XDEBUG_CONFIG:-client_host=host.docker.internal}"
+            XDG_CONFIG_HOME: "/var/www/html/config"
+            XDG_DATA_HOME: "/var/www/html/data"
+            IGNITION_LOCAL_SITES_PATH: "${PWD}"
+            SUPERVISOR_PHP_COMMAND: "/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan serve --host=0.0.0.0 --port=80" # For development, for prod remove it!
+            # SUPERVISOR_PHP_COMMAND: "npx concurrently -c \"#93c5fd,#fb7185,#fdba74\" \"php -d variables_order=EGPCS /var/www/html/artisan serve --host=0.0.0.0 --port=80\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,logs,vite" # For development, for prod remove it!
+            SUPERVISOR_REVERB_COMMAND: "/usr/bin/php /var/www/html/artisan reverb:start --host='0.0.0.0' --port=8080 --debug" # For development, for prod remove it!
         volumes:
-            - '.:/var/www/html'
+            - ".:/var/www/html"
         networks:
-            - laravel_app_net
+            - app_net
         # depends_on:
         #     - pgsql
         #     - redis
@@ -48,7 +57,7 @@ services:
     #         - 'app-pgsql:/var/lib/postgresql/data'
     #         - './vendor/laravel/app/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
     #     networks:
-    #         - laravel_app_net
+    #         - app_net
     #     healthcheck:
     #         test:
     #             - CMD
@@ -72,7 +81,7 @@ services:
     #     volumes:
     #         - 'app-redis:/data'
     #     networks:
-    #         - laravel_app_net
+    #         - app_net
     #     healthcheck:
     #         test:
     #             - CMD
@@ -94,7 +103,7 @@ services:
     #     volumes:
     #         - 'app-meilisearch:/meili_data'
     #     networks:
-    #         - laravel_app_net
+    #         - app_net
     #     healthcheck:
     #         test:
     #             - CMD
@@ -119,11 +128,11 @@ services:
     #     environment:
     #         MEILISEARCH_URL: "http://meilisearch:7700"
     #     networks:
-    #         - laravel_app_net
+    #         - app_net
     #     depends_on:
     #         - meilisearch
 networks:
-    laravel_app_net:
+    app_net:
         driver: bridge
 volumes:
     app-pgsql:
