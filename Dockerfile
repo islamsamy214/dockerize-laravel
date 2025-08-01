@@ -15,7 +15,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 # ENV SUPERVISOR_PHP_COMMAND="npx concurrently -c \"#93c5fd,#fb7185,#fdba74\" \"php -d variables_order=EGPCS /var/www/html/artisan serve --host=0.0.0.0 --port=80\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,logs,vite"
 ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan serve --host=0.0.0.0 --port=80"
-# ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan octane:start --server=frankenphp --host=0.0.0.0 --port=80"
+# ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan octane:start --server=frankenphp --host=0.0.0.0 --admin-port=2019 --port=80"
 ENV SUPERVISOR_QUEUE_COMMAND="/usr/bin/php /var/www/html/artisan queue:listen --tries=1 --timeout=240 --memory=128"
 ENV SUPERVISOR_SCHEDULER_COMMAND="/usr/bin/php /var/www/html/artisan schedule:work"
 ENV SUPERVISOR_PULSE_CHECK_COMMAND="/usr/bin/php /var/www/html/artisan pulse:check"
