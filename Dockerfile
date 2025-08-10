@@ -115,7 +115,7 @@ RUN usermod -u $WWWUSER app
 RUN mkdir /.composer \
     && chmod -R ugo+rw /.composer \
     && composer install --ignore-platform-reqs --no-interaction --no-progress --working-dir=/var/www/html \
-    && composer dump-autoload --optimize --no-dev --classmap-authoritative --working-dir=/var/www/html
+    && composer dump-autoload --optimize --classmap-authoritative --working-dir=/var/www/html
 
 # Build the node app; Packages with npm
 RUN su app -c "cd /var/www/html && npm install --no-save" \
