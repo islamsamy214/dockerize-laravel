@@ -20,9 +20,22 @@ php /var/www/html/artisan optimize
 php /var/www/html/artisan migrate --force
 # php /var/www/html/artisan scout:sync
 
+# Set correct ownership for Laravel application
 chown -R app:app /var/www/html
-chmod -R 775 /var/www/html/storage /var/www/html/public /var/www/html/bootstrap/cache
+
+# Make storage and public directories writable
+chmod -R 755 /var/www/html
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public
+
+# Explicitly create log directory with proper permissions
 mkdir -p /var/www/html/storage/logs
+chmod -R 775 /var/www/html/storage/logs
+chown -R app:app /var/www/html/storage/logs
+
+# Ensure FrankenPHP can write to its directories
+mkdir -p /data/caddy /config/caddy
+chown -R app:app /data/caddy /config/caddy
+chmod -R 755 /data/caddy /config/caddy
 
 if [ $# -gt 0 ]; then
     if [ "$SUPERVISOR_PHP_USER" = "root" ]; then
